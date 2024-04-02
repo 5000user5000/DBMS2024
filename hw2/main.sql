@@ -13,7 +13,6 @@ CREATE TABLE self (
     Name varchar(10) NOT NULL,
     PRIMARY KEY (StuID)
 )engine=InnoDB,charset=utf8;
-INSERT INTO self VALUES ('B09000000', '機械系', 4, 'Wayne');
 
 
 /****** create table *****/
@@ -56,8 +55,8 @@ CREATE TABLE artist_works (
 ) ENGINE=InnoDB,CHARSET=utf8;
 
 /* recursive relationship */
-/* mentorship table */
-CREATE TABLE mentorship (
+/* mentor table */
+CREATE TABLE mentor (
     MentorID INT NOT NULL,
     ArtistID INT NOT NULL,
     FOREIGN KEY (MentorID) REFERENCES artist(ArtistID),
@@ -69,14 +68,15 @@ CREATE TABLE mentorship (
 
 CREATE TABLE animator (
     ArtistID INT PRIMARY KEY,
-    Level ENUM('Intern','Junior', 'Senior', 'Staff','Principal') NOT NULL  DEFAULT 'Junior',
+    Level ENUM('Intern','Junior', 'Senior', 'Staff','Principal')   DEFAULT 'Junior',
     ExpYears INT NOT NULL,
     FOREIGN KEY (ArtistID) REFERENCES artist(ArtistID),
     CHECK (ExpYears >= 0)
 ) ENGINE=InnoDB,CHARSET=utf8;
 
+
 CREATE TABLE mangaka (
-    ArtistID INT PRIMARY KEY,
+	ArtistID INT PRIMARY KEY,
     PenName VARCHAR(255),
     DebutWork VARCHAR(255) NOT NULL,
     FOREIGN KEY (ArtistID) REFERENCES artist(ArtistID)
@@ -100,12 +100,18 @@ CREATE TABLE manga (
     FOREIGN KEY (AuthorID) REFERENCES mangaka(ArtistID) ON DELETE SET NULL
 ) ENGINE=InnoDB,CHARSET=utf8;
 
-
+CREATE TABLE illustrate (
+    MangaID INT NOT NULL ,
+    ArtistID INT NOT NULL,
+    FOREIGN KEY (MangaID) REFERENCES manga(MangaID),
+    FOREIGN KEY (ArtistID) REFERENCES mangaka(ArtistID),
+    PRIMARY KEY (MangaID, ArtistID)
+) ENGINE=InnoDB,CHARSET=utf8;
 
 
 CREATE TABLE anime (
     AnimeID INT PRIMARY KEY AUTO_INCREMENT,
-    Title VARCHAR(255) NOT NULL,
+    Title VARCHAR(255) UNIQUE NOT NULL,
     AirDate DATE,
     StudioID INT NOT NULL,
     AnimatorID INT NOT NULL,
@@ -114,7 +120,21 @@ CREATE TABLE anime (
 ) ENGINE=InnoDB,CHARSET=utf8;
 
 
+CREATE TABLE produce (
+	StudioID INT NOT NULL,
+    AnimeID  INT NOT NULL,
+    FOREIGN KEY (StudioID) REFERENCES studio(StudioID),
+	FOREIGN KEY (AnimeID) REFERENCES anime(AnimeID),
+    PRIMARY KEY (StudioID, AnimeID)
+) ENGINE=InnoDB,CHARSET=utf8;
 
+CREATE TABLE animate (
+	AnimeID  INT NOT NULL,
+    ArtistID INT NOT NULL,
+    FOREIGN KEY (AnimeID) REFERENCES anime(AnimeID),
+	FOREIGN KEY (ArtistID) REFERENCES animator(ArtistID),
+    PRIMARY KEY (AnimeID, ArtistID)
+) ENGINE=InnoDB,CHARSET=utf8;
 
 CREATE TABLE anime_CV (
     AnimeID INT,
@@ -209,6 +229,8 @@ CREATE TABLE villain_motivation (
 
 
 /***** INSERT section *****/
+INSERT INTO self VALUES ('b00000000', '機械系', 0, 'XXX');
+
 INSERT INTO studio (Name, Location_City, Location_State, Location_Street, Location_Street_Number, Location_Apartment_number) VALUES
 ('Studio Ghibli', '東京', '東京都', '青山', '1-2-3', '101'),
 ('Toei Animation', '大阪', '大阪府', '梅田', '4-5-6', '202'),
@@ -253,7 +275,7 @@ INSERT INTO artist_works (ArtistID, WorkTitle) VALUES
 (8, 'BLEACH'),
 (9, '銀河英雄傳說');
 
-INSERT INTO mentorship (MentorID, ArtistID) VALUES 
+INSERT INTO mentor (MentorID, ArtistID) VALUES 
 (1, 2),
 (1, 3),
 (7, 4),
@@ -269,9 +291,9 @@ INSERT INTO participation (StudioID, ArtistID) VALUES
 (9, 9);
 
 INSERT INTO animator (ArtistID, Level, ExpYears) VALUES 
-(1, 'Senior', 30),
-(4, 'Junior', 5),
-(7, 'Senior', 25);
+(1,'Senior', 30),
+(4 ,'Junior', 5),
+(7,'Senior', 25);
 
 INSERT INTO mangaka (ArtistID, PenName, DebutWork) VALUES 
 (2, '尾田榮一郎', '海賊王'),
@@ -293,10 +315,26 @@ INSERT INTO anime (Title, AirDate, StudioID, AnimatorID) VALUES
 ('命運石之門', '2011-04-06', 7, 4),
 ('你的名字', '2016-08-26', 4, 7);
 
+INSERT INTO produce (StudioID, AnimeID) VALUES 
+(1,1),
+(7,2),
+(4,3);
+
+INSERT INTO animate (AnimeID, ArtistID) VALUES 
+(1, 1),
+(2, 7),
+(3, 4);
+
+
 INSERT INTO manga (Title, PublicationDate, Genres, AuthorID) VALUES 
 ('海賊王', '1997-07-22', '冒險', 2),
 ('命運石之門', '2009-10-15', '科幻', 3),
 ('BLEACH', '2001-08-20', '冒險, 超自然', 8);
+
+INSERT INTO illustrate (MangaID, ArtistID) VALUES 
+(1, 2),
+(2, 3),
+(3, 8);
 
 INSERT INTO anime_CV (AnimeID, CV_name) VALUES 
 (1, '高山南'),
@@ -315,6 +353,8 @@ INSERT INTO content (Status, Rating, Format, AnimeID, MangaID) VALUES
 ('Ongoing', 4, 'TV', NULL, 1),
 ('Complete', 5, 'Web', NULL, 2),
 ('Complete', 5, 'Web', NULL, 3);
+
+
 
 INSERT INTO characterData (Name, ContentID) VALUES 
 ('龍貓', 1),
@@ -372,7 +412,7 @@ SELECT * FROM studio;
 SELECT * FROM studio_works;
 SELECT * FROM artist;
 SELECT * FROM artist_works;
-SELECT * FROM mentorship;
+SELECT * FROM mentor;
 SELECT * FROM participation;
 SELECT * FROM animator;
 SELECT * FROM mangaka;
@@ -388,6 +428,10 @@ SELECT * FROM hero;
 SELECT * FROM hero_power;
 SELECT * FROM villain;
 SELECT * FROM villain_motivation;
+SELECT * FROM  participation;
+SELECT * FROM  produce;
+SELECT * FROM  animate;
+SELECT * FROM  illustrate;
 SELECT * FROM StudioView;
 SELECT * FROM ArtistView;
 
