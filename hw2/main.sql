@@ -229,7 +229,7 @@ CREATE TABLE villain_motivation (
 
 
 /***** INSERT section *****/
-INSERT INTO self VALUES ('b00000000', '機械系', 0, 'XXX');
+INSERT INTO self VALUES ('b0000000', '機械系', 0, 'xxx');
 
 INSERT INTO studio (Name, Location_City, Location_State, Location_Street, Location_Street_Number, Location_Apartment_number) VALUES
 ('Studio Ghibli', '東京', '東京都', '青山', '1-2-3', '101'),
@@ -396,15 +396,20 @@ INSERT INTO villain_motivation (CharacterID, motivation) VALUES
 
 
 /***** Creating views *****/ 
-CREATE VIEW StudioView AS
-SELECT StudioID, Location_City, Location_Street
-FROM studio
-WHERE Location_City = '東京';
+CREATE VIEW StudioWorkView AS
+SELECT s.StudioID, s.Name AS StudioName, s.Location_City, sw.WorkTitle
+FROM studio s
+JOIN studio_works sw ON s.StudioID = sw.StudioID
+WHERE s.Location_City = '東京'
+ORDER BY s.StudioID;
 
-CREATE VIEW ArtistView AS
-SELECT ArtistID, Name, DateOfBirth
-FROM artist
-WHERE DateOfBirth >= '1970-01-01';
+CREATE OR REPLACE VIEW ArtistWorkView AS
+SELECT a.ArtistID, a.Name AS ArtistName, a.DateOfBirth, a.Role, aw.WorkTitle
+FROM artist a
+JOIN artist_works aw ON a.ArtistID = aw.ArtistID
+WHERE a.DateOfBirth >= '1970-01-01'
+ORDER BY a.ArtistID;
+
 
 /***** select from all tables and views *****/
 SELECT * FROM self;
@@ -432,8 +437,8 @@ SELECT * FROM  participation;
 SELECT * FROM  produce;
 SELECT * FROM  animate;
 SELECT * FROM  illustrate;
-SELECT * FROM StudioView;
-SELECT * FROM ArtistView;
+SELECT * FROM StudioWorkView;
+SELECT * FROM ArtistWorkView;
 
 
 /*****  drop database *****/
