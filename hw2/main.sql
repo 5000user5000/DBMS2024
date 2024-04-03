@@ -2,8 +2,6 @@
 CREATE DATABASE AniMangaDB;
 USE AniMangaDB;
 
--- SHOW CREATE TABLE self;
-
 
 /****** info ******/
 CREATE TABLE self (
@@ -403,7 +401,7 @@ JOIN studio_works sw ON s.StudioID = sw.StudioID
 WHERE s.Location_City = '東京'
 ORDER BY s.StudioID;
 
-CREATE OR REPLACE VIEW ArtistWorkView AS
+CREATE VIEW ArtistWorkView AS
 SELECT a.ArtistID, a.Name AS ArtistName, a.DateOfBirth, a.Role, aw.WorkTitle
 FROM artist a
 JOIN artist_works aw ON a.ArtistID = aw.ArtistID
