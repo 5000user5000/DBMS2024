@@ -227,7 +227,7 @@ CREATE TABLE villain_motivation (
 
 
 /***** INSERT section *****/
-INSERT INTO self VALUES ('b0xxxxx', 'xx系', 4, 'xxx');
+INSERT INTO self VALUES ('b09xxxx', 'xx系', 4, 'xxx');
 
 INSERT INTO studio (Name, Location_City, Location_State, Location_Street, Location_Street_Number, Location_Apartment_number) VALUES
 ('Studio Ghibli', '東京', '東京都', '青山', '1-2-3', '101'),
@@ -563,6 +563,47 @@ WHERE NOT EXISTS (
     WHERE p.StudioID = s.StudioID
 );
 
+/***** Union、Intersect、Difference*****/
+CREATE TABLE t1 (a INT, b INT);
+INSERT INTO t1 VALUES (4,2), (3,4);
+CREATE TABLE t2 (a INT, b INT);
+INSERT INTO t2 VALUES (1,2), (3,4);
+
+/*union*/
+SELECT * FROM t1
+UNION
+SELECT * FROM t2;
+
+/*intersect*/
+SELECT t1.* FROM t1
+INNER JOIN t2 ON t1.a = t2.a AND t1.b = t2.b;
+
+/*difference*/
+SELECT t1.* FROM t1
+LEFT JOIN t2 ON t1.a = t2.a AND t1.b = t2.b
+WHERE t2.a IS NULL AND t2.b IS NULL;
+
+/***** Advanced*****/
+CREATE TABLE student(ID INT, YEAR INT);
+INSERT INTO student VALUES (11, 3), (12,3), (13,4), (14,4) ;
+CREATE TABLE staff(ID INT, RANKING INT);
+INSERT INTO staff VALUES (15,22), (16,23);
+
+/*outer union*/
+SELECT s.ID, s.YEAR, sf.RANKING
+FROM student s
+LEFT JOIN staff sf ON s.ID = sf.ID
+UNION ALL
+SELECT sf.ID, s.YEAR, sf.RANKING
+FROM staff sf
+LEFT JOIN student s ON sf.ID = s.ID
+WHERE s.ID IS NULL;
+
+/*staff members who are not also students*/
+SELECT sf.ID, sf.RANKING
+FROM staff sf
+LEFT JOIN student s ON sf.ID = s.ID
+WHERE s.ID IS NULL;
 
 
 /*****  drop database *****/
