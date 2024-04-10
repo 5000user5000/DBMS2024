@@ -227,7 +227,7 @@ CREATE TABLE villain_motivation (
 
 
 /***** INSERT section *****/
-INSERT INTO self VALUES ('b000000', '機械系', 0, 'xxx');
+INSERT INTO self VALUES ('b0xxxxx', 'xx系', 4, 'xxx');
 
 INSERT INTO studio (Name, Location_City, Location_State, Location_Street, Location_Street_Number, Location_Apartment_number) VALUES
 ('Studio Ghibli', '東京', '東京都', '青山', '1-2-3', '101'),
@@ -412,39 +412,36 @@ INSERT INTO villain_motivation (CharacterID, motivation) VALUES
 
 
 -- new insert
-INSERT INTO studio_works (StudioID, WorkTitle) VALUES 
-(9, '甲鐵城的卡巴內里'),
-(9, '大神與七位伙伴');
 INSERT INTO produce (StudioID, AnimeID) VALUES 
-(1, 22),
-(1, 23),
-(1, 24),
-(1, 25),
-(1, 26),
-(1, 27),
-(1, 28),
-(1, 29),
-(1, 30);
+(1, 4),
+(1, 5),
+(1, 6),
+(2, 7),
+(2, 8),
+(3, 9),
+(3, 10),
+(4, 11),
+(5, 12);
 INSERT INTO anime_CV (AnimeID, CV_name) VALUES 
-(22, '井上真樹夫'), -- 天空之城
-(23, '松田洋治'), -- 幽靈公主
-(24, '西島秀俊'), -- 起風了
-(25, '保志總一朗'), -- 寒蟬鳴泣之時
-(26, '釘宮理惠'), -- 龍與虎
-(27, '阪本真綾'), -- 交響詩篇
-(28, '山下大輝'), -- 我的英雄學院
-(29, '花澤香菜'), -- 甲鐵城的卡巴內里
-(30, '福山潤'); -- 大神與七位伙伴
+(4, '井上真樹夫'), -- 天空之城
+(5, '松田洋治'), -- 幽靈公主
+(6, '西島秀俊'), -- 起風了
+(7, '保志總一朗'), -- 寒蟬鳴泣之時
+(8, '釘宮理惠'), -- 龍與虎
+(9, '阪本真綾'), -- 交響詩篇
+(10, '山下大輝'), -- 我的英雄學院
+(11, '花澤香菜'), -- 甲鐵城的卡巴內里
+(12, '福山潤'); -- 大神與七位伙伴
 INSERT INTO content (Status, Rating, Format, AnimeID, MangaID) VALUES 
-('Complete', 5, 'Movie', 22, NULL), -- 天空之城
-('Complete', 2, 'Movie', 23, NULL), -- 幽靈公主
-('Complete', 4, 'Movie', 24, NULL), -- 起風了
-('Complete', 3, 'TV', 25, NULL), -- 寒蟬鳴泣之時
-('Complete', 5, 'TV', 26, NULL), -- 龍與虎
-('Complete', 4, 'TV', 27, NULL), -- 交響詩篇
-('Ongoing', 2, 'TV', 28, NULL), -- 我的英雄學院
-('Complete', 1, 'TV', 29, NULL), -- 甲鐵城的卡巴內里
-('Complete', 2, 'TV', 30, NULL); -- 大神與七位伙伴
+('Complete', 5, 'Movie', 4, NULL), -- 天空之城
+('Complete', 2, 'Movie', 5, NULL), -- 幽靈公主
+('Complete', 4, 'Movie', 6, NULL), -- 起風了
+('Complete', 3, 'TV', 7, NULL), -- 寒蟬鳴泣之時
+('Complete', 5, 'TV', 8, NULL), -- 龍與虎
+('Complete', 4, 'TV', 9, NULL), -- 交響詩篇
+('Ongoing', 2, 'TV', 10, NULL), -- 我的英雄學院
+('Complete', 1, 'TV', 11, NULL), -- 甲鐵城的卡巴內里
+('Complete', 2, 'TV', 12, NULL); -- 大神與七位伙伴
 
 
 /***** Creating views *****/ 
@@ -481,19 +478,14 @@ SELECT Name AS StudioName, Location_City AS City, Location_State AS State
 FROM studio;
 
 /*Equijoin*/
-SELECT a.Name AS ArtistName, aw.WorkTitle
+SELECT a.Name AS Artist, aw.WorkTitle
 FROM artist AS a
 JOIN artist_works AS aw ON a.ArtistID = aw.ArtistID;
 
-SELECT cd.Name AS CharacterName, v.VillainScheme
-FROM hero AS h
-JOIN villain AS v ON h.CharacterID = v.CharacterID
-JOIN characterdata as cd ON v.CharacterID = cd.CharacterID ;
-
 /*Natural Join*/
 SELECT *
-FROM manga
-NATURAL JOIN illustrate;
+FROM anime
+NATURAL JOIN studio; 
 
 /*Theta Join*/
 SELECT *
@@ -501,26 +493,77 @@ FROM manga AS m
 JOIN artist AS a ON m.AuthorID = a.ArtistID AND a.DateOfBirth > '1970-01-01';
 
 /*Three-table Join*/
-SELECT s.Name AS StudioName, a.Title AS AnimeTitle, ar.Name AS ArtistName
-FROM studio AS s
-JOIN produce AS p ON s.StudioID = p.StudioID
-JOIN anime AS a ON p.AnimeID = a.AnimeID
-JOIN animate AS an ON a.AnimeID = an.AnimeID
-JOIN artist AS ar ON an.ArtistID = ar.ArtistID;
+SELECT cd.Name AS CharacterName, v.VillainScheme
+FROM hero AS h
+JOIN villain AS v ON h.CharacterID = v.CharacterID
+JOIN characterdata as cd ON v.CharacterID = cd.CharacterID ;
 
 /*Aggregate*/
-SELECT StudioID, COUNT(*) AS TotalAnimes
-FROM anime
-GROUP BY StudioID;
+SELECT
+    s.Location_State,
+    MAX(c.Rating) AS MaxRating,
+    MIN(c.Rating) AS MinRating,
+    COUNT(DISTINCT s.StudioID) AS StudioCount
+FROM studio s
+JOIN produce p ON s.StudioID = p.StudioID
+JOIN anime a ON p.AnimeID = a.AnimeID
+JOIN content c ON a.AnimeID = c.AnimeID
+GROUP BY s.Location_State;
+
+
 
 /*Aggregate with HAVING */
-SELECT s.name AS studio , round(AVG(content.Rating),2) AS WorkAverageRating
-FROM studio AS s
-JOIN studio_works AS sw ON s.StudioID = sw.StudioID
-JOIN anime ON anime.title = sw.WorkTitle
-JOIN content ON content.AnimeID = anime.AnimeID
-GROUP BY s.StudioID
-HAVING COUNT(s.StudioID) > 1;
+SELECT
+    Level,
+    AVG(ExpYears) AS AvgExperience,
+    SUM(ExpYears) AS TotalExperience,
+    COUNT(*) AS AnimatorCount
+FROM animator
+GROUP BY Level
+HAVING AVG(ExpYears) > 3;
+
+/*IN operator and explicit set value*/
+SELECT *
+FROM anime
+WHERE Title IN ('龍貓', '你的名字');
+
+/*IN operator and dynamic set value*/
+SELECT *
+FROM anime
+WHERE AnimatorID IN (
+    SELECT ArtistID
+    FROM artist
+    WHERE Name = '宮崎駿'
+);
+
+/*correlated nested query using the IN operator*/
+SELECT *
+FROM manga m
+WHERE AuthorID IN (
+    SELECT ArtistID
+    FROM mangaka_awards ma
+    WHERE m.AuthorID = ma.ArtistID
+);
+
+/*correlated nested query using the EXIST operator*/
+SELECT *
+FROM studio s
+WHERE EXISTS (
+    SELECT 1
+    FROM participation p
+    WHERE p.StudioID = s.StudioID AND p.ArtistID IS NOT NULL
+);
+
+/*correlated nested query using the NOT EXIST*/
+SELECT s.*
+FROM studio s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM produce p
+    WHERE p.StudioID = s.StudioID
+);
+
+
 
 /*****  drop database *****/
 DROP DATABASE AniMangaDB;
