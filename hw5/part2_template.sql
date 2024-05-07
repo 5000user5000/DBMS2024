@@ -17,7 +17,7 @@ SELECT DATABASE();
 SELECT * FROM self;
 
 /* Prepared statement */
-PREPARE dept_students FROM 'SELECT * FROM students WHERE department = ?';
+PREPARE dept_students FROM 'SELECT * FROM student WHERE department = ?';
 
 -- 設定系所參數
 SET @my_dept = '機械系';
@@ -51,7 +51,7 @@ END//
 DELIMITER ;
 
 -- 使用儲存函數列出組員姓名
-SELECT name, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName FROM students WHERE `group` = 7;
+SELECT name, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName FROM student WHERE `group` = 7;
 
 
 /* Stored procedure */
@@ -59,7 +59,7 @@ SELECT name, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS Englis
 DELIMITER //
 CREATE PROCEDURE CountStudentsInDepartment(IN dept_name VARCHAR(255))
 BEGIN
-    SELECT COUNT(*) INTO @STCOUNT FROM students WHERE department = dept_name;
+    SELECT COUNT(*) INTO @STCOUNT FROM student WHERE department = dept_name;
 END//
 DELIMITER ;
 
@@ -72,7 +72,7 @@ SELECT @STCOUNT;
 /* View  */
 -- 創建視圖，將姓名拆分為中文名和英文名
 CREATE VIEW new_student AS
-SELECT id, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName, department FROM students;
+SELECT id, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName, department FROM student;
 
 -- 查詢視圖
 SELECT * FROM new_student WHERE department = '機械系';
@@ -95,14 +95,14 @@ SET @NUMDEL = 0;
 
 -- 創建觸發器
 DELIMITER //
-CREATE TRIGGER after_student_insert AFTER INSERT ON students
+CREATE TRIGGER after_student_insert AFTER INSERT ON student
 FOR EACH ROW
 BEGIN
     INSERT INTO record_table (action_type, student_id, action_user) VALUES ('INSERT', NEW.student_id, USER());
     SET @NUMINS = @NUMINS + 1;
 END;
 
-CREATE TRIGGER after_student_delete AFTER DELETE ON students
+CREATE TRIGGER after_student_delete AFTER DELETE ON student
 FOR EACH ROW
 BEGIN
     INSERT INTO record_table (action_type, student_id, action_user) VALUES ('DELETE', OLD.student_id, USER());
@@ -127,4 +127,4 @@ SELECT * FROM record_table;
 SELECT @NUMINS AS Total_Inserts, @NUMDEL AS Total_Deletes;
 
 /* drop database */
-DROP DATABASE stuDB;
+DROP DATABASE DB_class;
