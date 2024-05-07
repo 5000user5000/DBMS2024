@@ -72,10 +72,10 @@ SELECT @STCOUNT;
 /* View  */
 -- 創建視圖，將姓名拆分為中文名和英文名
 CREATE VIEW new_student AS
-SELECT id, GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName, department FROM student;
+SELECT id, identity , department , degree , student_id ,  GetChineseName(name) AS ChineseName, GetEnglishName(name) AS EnglishName , email , class FROM student;
 
 -- 查詢視圖
-SELECT * FROM new_student WHERE department = '機械系';
+SELECT department , degree , student_id,  ChineseName , EnglishName FROM new_student WHERE department = '機械系';
 
 
 /* Trigger */
@@ -111,6 +111,10 @@ END; //
 
 DELIMITER ;
 
+
+-- 查询record_table的内容和變量，驗證為空
+SELECT * FROM record_table;
+SELECT @NUMINS AS Total_Inserts, @NUMDEL AS Total_Deletes;
 
 -- 測試觸發器
 -- 插入三個學生
