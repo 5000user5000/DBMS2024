@@ -41,7 +41,7 @@ MATCH (student:Student)-[:BELONGS_TO]->(group:Group)
 MATCH (student)-[:BELONGS_TO]->(dept:Department)
 WITH group.id AS group_id, collect(DISTINCT dept.name) AS departments
 RETURN group_id, departments
-ORDER BY size(departments) DESC, group_id ASC
+ORDER BY size(departments) DESC, toInteger(group_id) ASC
 LIMIT 5;
 
 // task 7
